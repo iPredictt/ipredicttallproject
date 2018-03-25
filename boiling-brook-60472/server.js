@@ -9,7 +9,7 @@ var app = express();
 var http = require('http').Server(app);
 //var io = require('socket.io')(http);
 
-mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://wavelengthadmin:wavelengthappsecret@139.59.4.42/wavelength');
+mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://wavelengthdeveloper:QWERTY121wavelength@139.59.39.209/wavelength');
 app.use(express.static(__dirname + '/public'));
 
 
