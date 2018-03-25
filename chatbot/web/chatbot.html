@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Careerletics-chatbot</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+	<link rel="stylesheet" type="text/css" href="chat2_style.css">
+    
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <!--
+    <script src="https://www.webrtc-experiment.com/RecordRTC.js"> </script>
+    -->
+    <script src="MediaStreamRecorder.js"></script>  
+    <script src="/socket.io/socket.io.js"></script>  
+    
+	<script type="text/javascript">
+
+		(function () {
+				var Message;
+			    Message = function (arg) {
+			        this.text = arg.text, this.message_side = arg.message_side;
+			        this.draw = function (_this) {
+			            return function () {
+			                var $message;
+			                $message = $($('.message_template').clone().html());
+			                $keyV=$('#key').val();
+			                
+			                $message.addClass(_this.message_side).find('.text').html(_this.text);
+					        $('.messages').append($message);
+			                return setTimeout(function () {
+			                    return $message.addClass('appeared');
+			                }, 0);
+			            };
+			        }(this);
+			        return this;
+			    };
+			    $(function () {
+
+					$userid = location.search.split('id=')[1]
+					$socket = io();
+					$socket.emit('init', $userid);
+					$keyType=0;
+					
+					$socket.on('chat message', function(message){
+						console.log(message);
+						$('#key').val(message.key);
+                        if ((message.key == 'VA1'))	
+			            {
+                               setTimeout(function () {
+		                             PopUp('show');
+		                        }, 4000);
+			            }
+			            else
+                        	sendMessage(message.message,'left');
+
+                        $keyType=0;
+                        if(message.key == 'Q'){
+						setTimeout(function () {
+                             $socket.emit('chat message',$socket.id,'ok','');
+                        }, 2000);
+					}
+					});
+
+			        var getMessageText, message_side, sendMessage;
+			        message_side = 'right';
+			        getMessageText = function () {
+			            var $message_input;
+			            $message_input = $('.message_input');
+			            return $message_input.val();
+			        };
+			        sendMessage = function (text,side) {
+			            var $messages, message;
+			            if (text.trim() === '') {
+			                return;
+			            }
+			            $('.message_input').val('');
+			            $messages = $('.messages');
+			            message_side = side;
+			            message = new Message({
+			                text: text,
+			                message_side: message_side
+			            });
+			            message.draw();
+			            return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+			        };
+			        $('.send_message').click(function (e) {
+						$socket.emit('chat message', $socket.id, getMessageText(),$('#key').val());
+						$keyType=1;
+			            return sendMessage(getMessageText(),'right');
+			        });
+			        $('.message_input').keyup(function (e) {
+			            if (e.which === 13) {
+			            	$keyType=1;
+			            	$socket.emit('chat message', $socket.id, getMessageText(),$('#key').val());
+
+			                return sendMessage(getMessageText(),'right');
+			            }
+			        });
+
+				    PopUp = function(hideOrshow) {
+				        if (hideOrshow == 'hide') {
+				        	document.getElementById('ac-wrapper2').style.display = "none";
+				        }
+				        else 
+				        {
+				        	document.getElementById('ac-wrapper2').removeAttribute('style');
+				        }	
+
+				    }
+				    document.getElementById('x').onclick = function() {
+				        PopUp('hide')
+				    };
+
+				    stepsDisp = function(hideOrshow) {
+				        if (hideOrshow == 'hide') {
+				        	document.getElementById('stpH').style.display = "none";
+				        	document.getElementById('stpLst').style.display = "none";
+				        }
+				        else 
+				        {
+				        	document.getElementById('stpH').style.display = "initial";
+				        	document.getElementById('stpLst').style.display = "initial";
+				        }	
+				    }
+			    });
+		}.call(this));
+
+	</script>
+</head>
+<body>
+
+<input id="key" hidden="true"/>
+
+<div class="chat_window">
+   <div class="top_menu">
+      <img src="images/logo.png" alt="logo" data-src="images/logo.png" data-src-retina="images/logo.png" width="150">
+      <img style="float: right;" src="images/botimg2.png" alt="logo" data-src="images/botimg2.png" data-src-retina="images/botimg2.png" width="50" height="50">
+      <div class="title" style="margin-top: 0px">
+        
+      </div>
+   
+    </div>
+    <ul class="messages"></ul>
+    <div class="bottom_wrapper clearfix">
+    	<div class="message_input_wrapper">
+    		<input class="message_input" placeholder="Type your message here..." />
+    	</div>
+    	<div class="send_message">
+    		<div class="icon"></div>
+    		<div class="text">Send</div>
+    	</div>
+    </div>
+</div>
+<div style="display:none;">
+<div class="message_template">
+   	<li class="message">
+		<!-- <div class="avatar"></div>  -->
+		<div class="text_wrapper">
+			<div class="text"></div>
+		</div>
+	</li>
+</div>
+</div>
+
+<div class="chat_window" id="ac-wrapper2" style='display:none'>
+    <div id="header">
+	   <button id = "x">
+            X
+        </button>
+	   <h3 style="margin-top: 5px">Short Video Interview</h3>
+   </div>
+   <div style='float: left; width: 100%'>
+	   <div>
+	        <video id='camera-preview' poster='images/cameraposter.jpg'  style='float: left;  margin-left: 30px ; margin-top: 10px;  border: 1px solid rgb(15, 100, 150); width: 60%; height: 380px; '> 
+	        </video>
+	    </div>
+	    <div id = "side-bar"  >
+	        <h5 style='margin-top:-15px;'> Some of the things you may like to talk about :</h5>
+	        <ul style="font-size: 15px; margin-top:-5px;">
+	          <li>A brief introduction</li>
+	          <li>Your key strengths</li>
+	          <li>How you see yourself fitting into this role. or Anything you want to highlight from your profile</li>
+	        </ul>
+	       
+            <h5 id='tCntr' style='margin-top:0px;'>Max time: 60 seconds</h5>
+ 			<h5 id="stpH" style='margin-top:-5px; display:none;'>STEPS:</h5>
+				<ol id="stpLst" style="float: left; margin-top: 0px; margin-left: 5px; font-size: 15px; display:none;">
+				  <li>To redo click on Start button</li>
+				  <li>To upload click on Submit button</li>
+				</ol>
+	    </div> 
+   </div>
+    <div id="footer">
+        <button id="start-recording" >Start</button>
+        <button id="stop-recording"  disabled>Stop</button>
+        <button id="save-recording"  disabled>Submit</button>    
+    </div>
+</div>
+<script type="text/javascript">
+            function captureUserMedia(mediaConstraints, successCallback, errorCallback) {
+                navigator.mediaDevices.getUserMedia(mediaConstraints).then(successCallback).catch(errorCallback);
+            }
+
+            var mediaConstraints = {
+                audio: !IsOpera && !IsEdge, // record both audio/video in Firefox/Chrome
+                video: true
+            };
+
+            document.querySelector('#start-recording').onclick = function() {
+                this.disabled = true;
+                captureUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+                stepsDisp('hide');
+                myVar = setInterval(myTimer, 1000)
+                var totalSeconds = 60;
+                function myTimer() {
+                      --totalSeconds;
+                      document.getElementById("tCntr").innerHTML = "You have left:"+totalSeconds+ " Secs";
+                      if (totalSeconds <=0) {
+                         clearInterval(myVar);
+                         document.getElementById('stop-recording').click()
+                      }
+                }
+
+            };
+
+            document.querySelector('#stop-recording').onclick = function() {
+                this.disabled = true;
+                mediaRecorder.stop();
+                mediaRecorder.stream.stop();
+                cameraPreview.muted = false;
+                clearInterval(myVar);
+                stepsDisp('show');
+                document.querySelector('#start-recording').disabled = false;
+                document.querySelector('#save-recording').disabled = false;
+            };
+            document.querySelector('#save-recording').onclick = function() {
+                this.disabled = true;
+                getDataURL(gBlob,function(videoDataURL) {
+                        var files = {
+                            video: {
+                                type: 'video/webm',
+                                dataURL: videoDataURL
+                            }
+                         }
+                         $socket.emit('chat message', $socket.id, files,'VA1');
+                });
+                document.querySelector('#start-recording').disabled = true;
+                PopUp('hide');
+            };
+
+            var mediaRecorder;
+            var gBlob;
+            var cameraPreview = document.getElementById('camera-preview');
+
+            function onMediaSuccess(stream) {
+
+                var videoWidth =  320;
+                var videoHeight =  240;
+                cameraPreview.width=videoWidth;
+                cameraPreview.height=videoHeight;
+                cameraPreview.muted = true;
+                cameraPreview.controls = true;  
+                cameraPreview.src = URL.createObjectURL(stream);
+                cameraPreview.play();              
+
+                mediaRecorder = new MediaStreamRecorder(stream);
+                mediaRecorder.stream = stream;
+
+                mediaRecorder.videoWidth = videoWidth;
+                mediaRecorder.videoHeight = videoHeight;
+                
+                mediaRecorder.ondataavailable = function(blob) {
+                    gBlob=blob;
+                    cameraPreview.src=URL.createObjectURL(blob); 
+                };
+                mediaRecorder.start(90*1000);
+
+                document.querySelector('#stop-recording').disabled = false;
+                document.querySelector('#save-recording').disabled = true;
+            }
+
+
+            function getDataURL(blob, callback) {
+                if (!!window.Worker) {
+                    var webWorker = processInWebWorker(function readFile(_blob) {
+                        postMessage(new FileReaderSync().readAsDataURL(_blob));
+                    });
+
+                    webWorker.onmessage = function(event) {
+                        callback(event.data);
+                    };
+
+                    webWorker.postMessage(blob);
+                } else {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = function(event) {
+                        callback(event.target.result);
+                    };
+                }
+            };
+
+            var worker;
+
+            function processInWebWorker(_function) {
+                if (worker) {
+                    return worker;
+                }
+
+                var blob = URL.createObjectURL(new Blob([_function.toString(),
+                    'this.onmessage =  function (e) {' + _function.name + '(e.data);}'
+                ], {
+                    type: 'application/javascript'
+                }));
+
+                worker = new Worker(blob);
+                URL.revokeObjectURL(blob);
+                return worker;
+            };
+
+            function saveFileToDsk(file, fileName) {
+                
+                if (!file) {
+                    throw 'Blob object is required.';
+                }
+
+                if (!file.type) {
+                    try {
+                        file.type = 'video/webm';
+                    } catch (e) {}
+                }
+                  
+                var fileExtension = ('video/webm').split('/')[1];
+                
+                if (fileName && fileName.indexOf('.') !== -1) {
+                    var splitted = fileName.split('.');
+                    fileName = splitted[0];
+                    fileExtension = splitted[1];
+                }
+
+                var fileFullName = (fileName || (Math.round(Math.random() * 9999999999) + 888888888)) + '.' + fileExtension;
+                alert('Save1');
+                if (typeof navigator.msSaveOrOpenBlob !== 'undefined') {
+                    return navigator.msSaveOrOpenBlob(file, fileFullName);
+                } else if (typeof navigator.msSaveBlob !== 'undefined') {
+                    return navigator.msSaveBlob(file, fileFullName);
+                }
+                alert('Save2');
+                //navigator.msSaveBlob(file, fileFullName);
+                var hyperlink = document.createElement('a');
+                hyperlink.href = URL.createObjectURL(file);
+                hyperlink.target = '_blank';
+                hyperlink.download = fileFullName;
+                alert('Save3');
+                if (!!navigator.mozGetUserMedia) {
+                    hyperlink.onclick = function() {
+                        (document.body || document.documentElement).removeChild(hyperlink);
+                    };
+                    (document.body || document.documentElement).appendChild(hyperlink);
+                }
+                alert('Save4');
+                var evt = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                alert('Save5');
+                hyperlink.dispatchEvent(evt);
+
+                if (!navigator.mozGetUserMedia) {
+                    URL.revokeObjectURL(hyperlink.href);
+                }
+            };
+
+
+            function onMediaError(e) {
+                console.error('media error', e);
+            };
+
+
+            function bytesToSize(bytes) {
+                var k = 1000;
+                var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                if (bytes === 0) return '0 Bytes';
+                var i = parseInt(Math.floor(Math.log(bytes) / Math.log(k)), 10);
+                return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+            };
+
+            // below function via: http://goo.gl/6QNDcI
+            function getTimeLength(milliseconds) {
+                var data = new Date(milliseconds);
+                return data.getUTCHours() + " hours, " + data.getUTCMinutes() + " minutes and " + data.getUTCSeconds() + " second(s)";
+            };
+
+            window.onbeforeunload = function() {
+                document.querySelector('#start-recording').disabled = false;
+            };
+
+
+</script>
+
+</body>
+
+</html>

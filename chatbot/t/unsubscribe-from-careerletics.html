@@ -1,0 +1,28 @@
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.js"></script>
+<script type="text/javascript"></script>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js">  </script>
+
+
+
+<script>
+    var socketio = io();
+    socketio.on('connect', function() {
+
+
+    });
+    var id = location.search.split("&")[0].replace("?","").split("=")[1];
+    var token = location.search.split("&")[1].replace("?","").split("=")[1]  ? location.search.split("&")[1].replace("?","").split("=")[1] : "2147as";
+    var subs_type = location.search.split('type=')[1] ? location.search.split('type=')[1] : "course-recommendations";
+
+    var files = {
+                
+        email: id,
+        token: token,
+        type: subs_type
+                
+    }
+    socketio.emit('message', files);
+
+</script>
+
+<div style='float:left; margin-top: 10px;font-family:Arial, Helvetica, sans-serif;font-size: 22px;font-style: normal;font-weight: normal;  '>You are successfully unsubscribed from careerletics user mailing list. </div>
